@@ -41,15 +41,8 @@ fn read_byte(r: &mut io::Read) -> io::Result<u8> {
     }
 }
 
-/// Parse a compiled terminfo entry, using long capability names if `longnames`
-/// is true
-pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<Terminfo> {
-    let (bnames, snames, nnames) = if longnames {
-        (boolfnames, stringfnames, numfnames)
-    } else {
-        (boolnames, stringnames, numnames)
-    };
-
+/// Parse a compiled terminfo entry.
+pub fn parse(file: &mut io::Read) -> io::Result<Terminfo> {
     // Check magic number
     let magic = try!(read_le_u16(file));
     if magic != 0x011A {
@@ -108,7 +101,7 @@ pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<Terminfo> {
     let bools_map: HashMap<&str, bool> = try! {
         (0..bools_bytes).filter_map(|i| match read_byte(file) {
             Err(e) => Some(Err(e)),
-            Ok(1) => Some(Ok((bnames[i], true))),
+            Ok(1) => Some(Ok((boolnames[i], true))),
             Ok(_) => None
         }).collect()
     };
@@ -120,7 +113,7 @@ pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<Terminfo> {
     let numbers_map: HashMap<&str, u16> = try! {
         (0..numbers_count).filter_map(|i| match read_le_u16(file) {
             Ok(0xFFFF) => None,
-            Ok(n) => Some(Ok((nnames[i], n))),
+            Ok(n) => Some(Ok((numnames[i], n))),
             Err(e) => Some(Err(e))
         }).collect()
     };
@@ -142,11 +135,7 @@ pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<Terminfo> {
                            .map(|(i, offset)| {
                                let offset = offset as usize;
 
-                               let name = if snames[i] == "_" {
-                                   stringfnames[i]
-                               } else {
-                                   snames[i]
-                               };
+                               let name = stringnames[i];
 
                                if offset == 0xFFFE {
                                    // undocumented: FFFE indicates cap@, which means the capability
@@ -178,17 +167,4 @@ pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<Terminfo> {
         numbers: numbers_map,
         strings: string_map,
     })
-}
-
-#[cfg(test)]
-mod test {
-
-    use super::{boolnames, boolfnames, numnames, numfnames, stringnames, stringfnames};
-
-    #[test]
-    fn test_veclens() {
-        assert_eq!(boolfnames.len(), boolnames.len());
-        assert_eq!(numfnames.len(), numnames.len());
-        assert_eq!(stringfnames.len(), stringnames.len());
-    }
 }

@@ -55,7 +55,7 @@ impl Terminfo {
     fn _from_path(path: &Path) -> io::Result<Terminfo> {
         let file = try!(File::open(path));
         let mut reader = BufReader::new(file);
-        parse(&mut reader, false)
+        parse(&mut reader)
     }
 }
 
