@@ -14,6 +14,7 @@ use self::Param::*;
 use self::States::*;
 use self::FormatState::*;
 use self::FormatOp::*;
+use std::io;
 
 use std::iter::repeat;
 
@@ -49,6 +50,7 @@ pub enum Param {
     Number(i32),
 }
 
+
 /// An error from interpreting a parameterized string.
 #[derive(Debug, Eq, PartialEq)]
 pub enum Error {
@@ -73,6 +75,12 @@ pub enum Error {
     FormatWidthOverflow,
     /// A format precision constant was too large (overflowed a usize)
     FormatPrecisionOverflow,
+}
+
+impl From<Error> for io::Error {
+    fn from(e: Error) -> io::Error {
+        io::Error::new(io::ErrorKind::InvalidData, e)
+    }
 }
 
 impl ::std::fmt::Display for Error {

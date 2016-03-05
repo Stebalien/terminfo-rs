@@ -23,7 +23,7 @@ use self::parser::compiled::parse;
 
 /// A parsed terminfo database entry.
 #[derive(Debug, Clone)]
-pub struct TermInfo {
+pub struct Terminfo {
     /// Names for the terminal
     pub names: Vec<String>,
     /// Map of capability name to boolean value
@@ -34,16 +34,16 @@ pub struct TermInfo {
     pub strings: HashMap<&'static str, Vec<u8>>,
 }
 
-impl TermInfo {
-    /// Create a TermInfo for the named terminal.
-    pub fn from_name(name: &str) -> io::Result<TermInfo> {
+impl Terminfo {
+    /// Create a Terminfo for the named terminal.
+    pub fn from_name(name: &str) -> io::Result<Terminfo> {
         get_dbpath_for_term(name)
             .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "database not found"))
-            .and_then(|p| TermInfo::from_path(&p))
+            .and_then(|p| Terminfo::from_path(&p))
     }
 
-    /// Parse the given TermInfo.
-    pub fn from_path<P: AsRef<Path>>(path: P) -> io::Result<TermInfo> {
+    /// Parse the given Terminfo.
+    pub fn from_path<P: AsRef<Path>>(path: P) -> io::Result<Terminfo> {
         Self::_from_path(path.as_ref())
     }
     // Keep the metadata small
@@ -52,7 +52,7 @@ impl TermInfo {
     // which implements AsRef<Path>. One day, if/when rustc is a bit smarter, it
     // might do this for
     // us. Alas. )
-    fn _from_path(path: &Path) -> io::Result<TermInfo> {
+    fn _from_path(path: &Path) -> io::Result<Terminfo> {
         let file = try!(File::open(path));
         let mut reader = BufReader::new(file);
         parse(&mut reader, false)
@@ -139,7 +139,7 @@ impl ::std::error::Error for Error {
 
 pub mod searcher;
 
-/// TermInfo format parsing.
+/// Terminfo format parsing.
 pub mod parser {
     //! ncurses-compatible compiled terminfo format parsing (term(5))
     pub mod compiled;

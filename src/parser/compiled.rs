@@ -15,7 +15,7 @@ use std::io::prelude::*;
 use std::io;
 
 use Error;
-use TermInfo;
+use Terminfo;
 
 pub use parser::names::*;
 
@@ -43,7 +43,7 @@ fn read_byte(r: &mut io::Read) -> io::Result<u8> {
 
 /// Parse a compiled terminfo entry, using long capability names if `longnames`
 /// is true
-pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<TermInfo> {
+pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<Terminfo> {
     let (bnames, snames, nnames) = if longnames {
         (boolfnames, stringfnames, numfnames)
     } else {
@@ -172,7 +172,7 @@ pub fn parse(file: &mut io::Read, longnames: bool) -> io::Result<TermInfo> {
     };
 
     // And that's all there is to it
-    Ok(TermInfo {
+    Ok(Terminfo {
         names: term_names,
         bools: bools_map,
         numbers: numbers_map,
